@@ -1,0 +1,14 @@
+{
+  "profile": "pduleba-admin-cli-profile",
+  "region": "eu-west-1",
+
+  "ami_name": "pduleba-jenkins-golden-ami",
+  "device_name": "/dev/xvda",
+  "volume_type": "gp2",
+  "volume_size": "10",
+
+  "ami_filter_names": "amzn2-ami-hvm-2.0.????????-x86_64-gp2",
+  "ami_filter_root_device_types": "ebs",
+  "ami_filter_virtualization_types": "hvm",
+  "ami_filter_owners": "amazon"
+}

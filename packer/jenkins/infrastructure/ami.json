@@ -1,0 +1,113 @@
+{
+  "variables": {
+    "profile": "",
+    "region": "",
+
+    "ami_name": "",
+    "device_name": "",
+    "volume_type": "",
+    "volume_size": "",
+
+    "ami_filter_names": "",
+    "ami_filter_root_device_types": "",
+    "ami_filter_virtualization_types": "",
+    "ami_filter_owners": ""
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+
+      "profile": "{{user `profile`}}",
+      "region": "{{user `region`}}",
+
+      "source_ami_filter": {
+        "filters": {
+          "name": "{{user `ami_filter_names`}}",
+          "root-device-type": "{{user `ami_filter_root_device_types`}}",
+          "virtualization-type": "{{user `ami_filter_virtualization_types`}}"
+        },
+        "owners": "{{user `ami_filter_owners`}}",
+        "most_recent": true
+      },
+      "ami_name": "{{user `ami_name`}}",
+      "ami_description": "Project Jenkins Server AWS AMI",
+      "instance_type": "t2.micro",
+      "launch_block_device_mappings": [
+        {
+          "device_name": "{{user `device_name`}}",
+          "volume_type": "{{user `volume_type`}}",
+          "volume_size": "{{user `volume_size`}}",
+          "delete_on_termination": false
+        }
+      ],
+
+      "ssh_username": "ec2-user",
+
+      "run_tags": {
+        "Name": "pduleba-jenkins-packer-ec2",
+        "Owner": "pduleba-jenkins"
+      },
+      "run_volume_tags": {
+        "Name": "pduleba-jenkins-packer-ebs",
+        "Owner": "pduleba-jenkins"
+      },
+      "tags": {
+        "Name": "pduleba-jenkins-golden-ami",
+        "Owner": "pduleba-jenkins"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["sleep 15"]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "rm -rf /tmp/groovy /tmp/bash",
+        "mkdir -p /tmp/groovy /tmp/bash"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "./infrastructure/groovy/configure-cli.groovy",
+      "destination": "/tmp/groovy/configure-cli.groovy"
+    },
+    {
+      "type": "file",
+      "source": "./infrastructure/groovy/configure-credentials.groovy",
+      "destination": "/tmp/groovy/configure-credentials.groovy"
+    },
+    {
+      "type": "file",
+      "source": "./infrastructure/groovy/configure-csrf.groovy",
+      "destination": "/tmp/groovy/configure-csrf.groovy"
+    },
+    {
+      "type": "file",
+      "source": "./infrastructure/groovy/configure-jnlp.groovy",
+      "destination": "/tmp/groovy/configure-jnlp.groovy"
+    },
+    {
+      "type": "file",
+      "source": "./infrastructure/groovy/configure-security.groovy",
+      "destination": "/tmp/groovy/configure-security.groovy"
+    },
+    {
+      "type": "file",
+      "source": "./infrastructure/bash/install-plugins.sh",
+      "destination": "/tmp/bash/install-plugins.sh"
+    },
+    {
+      "type": "file",
+      "source": "./infrastructure/bash/install-plugins-list.txt",
+      "destination": "/tmp/bash/install-plugins-list.txt"
+    },
+    {
+      "type": "shell",
+      "script": "./infrastructure/bash/setup.sh",
+      "execute_command": "sudo -E -S bash '{{ .Path }}'"
+    }
+  ]
+}
